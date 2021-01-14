@@ -35,6 +35,32 @@ public class Vector3d extends Vector
         return (float)Math.toDegrees(Math.acos(dotProduct));
     }
 
+    public Vector3d rotate(Vector3d axis, float angle) {
+        Vector3d axis_ = axis.normalize().toVector3d();
+        float angle_ = angle % 360.0f;
+        Quaternion q = Quaternion.toRotationQuaternion(axis_, angle_);
+
+        Quaternion rotated = q.hamiltonProduct(this.toQuaternion()).hamiltonProduct(q.conjugate());
+        return rotated.vector();
+    }
+
+    public Vector3d transform(Matrix m) {
+        Matrix vm = this.toMatrix4x1();
+        Matrix result = m.mul(vm);
+
+        return result.columnVector(0).toVector3d();
+    }
+
+    public Matrix toMatrix4x1() {
+        return new Matrix(4, 1, new float[] {
+                this.getX(), this.getY(), this.getZ(), 1.0f
+        });
+    }
+
+    public Quaternion toQuaternion() {
+        return new Quaternion(0.0f, this);
+    }
+
     public float getX() {
         return super.getValue(0);
     }
